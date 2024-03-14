@@ -1,7 +1,12 @@
+import numpy as np
 import cv2
 
+# print(cv2.__version__)
+
+
+
 # Open a video capture object for the Raspberry Pi camera
-cap = cv2.VideoCapture(0)  # 0 represents the default camera (Raspberry Pi Camera Module)
+cap = cv2.VideoCapture("footage/vid0.mp4")  # 0 represents the default camera (Raspberry Pi Camera Module)
 
 # Set the camera resolution (adjust as needed)
 cap.set(3, 640)  # Width
