@@ -1,10 +1,11 @@
 import numpy as np
+import os
 import cv2
 from deepface import Deepface
 
 print(cv2.__version__)
 
-detectors = models = [
+detectors = [
   "VGG-Face", 
   "Facenet", 
   "Facenet512", 
@@ -21,6 +22,26 @@ detectors = models = [
 # Open a video capture object for the Raspberry Pi camera
 cap = cv2.VideoCapture("footage/vid0.mp4")  # 0 represents the default camera (Raspberry Pi Camera Module)
 
+def acceptingNewVisitors(boolean):
+    return boolean
+
+def nameAlreadyExists(nameOfContact, path_to_contacts):
+    return os.path.isdir(f'Contacts/{nameOfContact}')
+
+def confirmSame(nameOfContact, face_image):
+    '''
+    If user inputs a name already in Contacts
+    '''
+    feedback_dialogue = f'Is {nameOfContact} the same person as: '
+    pass    
+
+def createContact(nameOfContact, face_image):
+    '''
+    Create a directory and add image of face
+    '''
+    feedback_dialogue = "Add to contacts?"
+    pass
+
 def findFace(frame_photo):
     '''
     TODO: detect multiple faces
@@ -28,15 +49,26 @@ def findFace(frame_photo):
     try:
         for detector in enumerate(detectors):
             face = DeepFace.detectFaces(frame_photo, detector_backend = detector)
+            return face
     except:
         pass
 
-def identifyName(frame_photo, path_to_contact_photos):
+def identifyFace(frame_photo, path_to_contact_photos):
+    '''
+    Identifies face by showing the directory under Contacts
+    '''
     try:
         for detector in enumerate(detectors):
             face = DeepFace.verify(img_path=frame_photo, db_path=path_to_contact_photos, detector_backend=detector)
-        # Display name of face
-            print(face)
+            
+            if face['verified']:
+                return os.listdir('.')
+            
+            else:
+                '''
+                if user selects acceptingNewVisitors as True create new contact
+                '''
+                pass
     except:
         pass        
 
@@ -49,7 +81,7 @@ while cap.isOpened():
         break
    
     cv2.imwrite('footage/temp.png', frame)
-    identifyName('footage.temp.png', './Contacts')
+    identifyFace('footage.temp.png', './Contacts')
     
 # Release the video capture object and close the OpenCV window
 cap.release()

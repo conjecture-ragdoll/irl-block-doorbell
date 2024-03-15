@@ -31,4 +31,4 @@ COPY . /app/
 EXPOSE 8000
 
 # Command to run the application
-# CMD ["python", "app.py"]
+CMD ["python3", "read_footage.py"]
