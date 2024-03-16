@@ -1,7 +1,7 @@
 import numpy as np
 import os
 import cv2
-from deepface import Deepface
+from deepface import DeepFace
 
 print(cv2.__version__)
 
@@ -19,8 +19,6 @@ detectors = [
 
 
 
-# Open a video capture object for the Raspberry Pi camera
-cap = cv2.VideoCapture("footage/vid0.mp4")  # 0 represents the default camera (Raspberry Pi Camera Module)
 
 def acceptingNewVisitors(boolean):
     return boolean
@@ -47,8 +45,8 @@ def findFace(frame_photo):
     TODO: detect multiple faces
     '''
     try:
-        for detector in enumerate(detectors):
-            face = DeepFace.detectFaces(frame_photo, detector_backend = detector)
+        for detector in detectors:
+            face = DeepFace.detectFace(frame_photo, detector_backend = detector)
             return face
     except:
         pass
@@ -57,20 +55,23 @@ def identifyFace(frame_photo, path_to_contact_photos):
     '''
     Identifies face by showing the directory under Contacts
     '''
+    contact_list = os.listdir(path='./Contacts')
     try:
-        for detector in enumerate(detectors):
-            face = DeepFace.verify(img_path=frame_photo, db_path=path_to_contact_photos, detector_backend=detector)
+        for contact in contact_list:
+            for detector in detectors:
+                face = DeepFace.find(img_path=frame_photo, db_path=f'./Contacts/', detector_backend=detector)
             
-            if face['verified']:
-                return os.listdir('.')
+                return face['identity']
+                    
+                
+                    '''
+                    if user selects acceptingNewVisitors as True create new contact
+                    '''
             
-            else:
-                '''
-                if user selects acceptingNewVisitors as True create new contact
-                '''
-                pass
     except:
         pass        
+
+cap = cv2.VideoCapture("footage/vid0.mp4")  # 0 represents the default camera (Raspberry Pi Camera Module)
 
 while cap.isOpened():
     # Read a frame from the video capture
@@ -81,6 +82,7 @@ while cap.isOpened():
         break
    
     cv2.imwrite('footage/temp.png', frame)
+    if findFace('footage/temp.png'):
     identifyFace('footage.temp.png', './Contacts')
     
 # Release the video capture object and close the OpenCV window

@@ -8,7 +8,7 @@ build:
 
 # Run Docker container
 run:
-	docker run -d -p 8000:8000 --name $(DOCKER_CONTAINER_NAME) $(DOCKER_IMAGE_NAME)
+	docker run --rm -it $(DOCKER_IMAGE_NAME) python3 AIDoorbell.py
 
 # Stop Docker container
 stop:
