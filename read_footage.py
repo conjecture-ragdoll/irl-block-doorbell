@@ -17,37 +17,50 @@ detectors = [
   "SFace",
 ]
 
-
-
+acceptingNewVisitors = True
 
 def acceptingNewVisitors(boolean):
-    return boolean
+    acceptingNewVisitors = boolean
 
-def nameAlreadyExists(nameOfContact, path_to_contacts):
-    return os.path.isdir(f'Contacts/{nameOfContact}')
+def addToPhotos(contactDir, face_image):
+    '''
+    contactDir is name of Contact folder containing the images
+    '''
 
-def confirmSame(nameOfContact, face_image):
     '''
-    If user inputs a name already in Contacts
+    In case of duplicate images, format string of path in the directory
     '''
-    feedback_dialogue = f'Is {nameOfContact} the same person as: '
-    pass    
+    countTotal = len(os.listdir(os.path.join('Contacts', contactDir)))
+    cv2.imwrite(os.path.join('Contacts', contactDir, f'{contactDir}%d' % countTotal), face_image)
 
-def createContact(nameOfContact, face_image):
+def YNFeedback(feedback_input):
     '''
-    Create a directory and add image of face
+    Ask in y/n format
     '''
-    feedback_dialogue = "Add to contacts?"
-    pass
+    feedback_dialogue = input(feedback_input)
+    feedback = feedback_dialogue.lower()
+    return feedback in ['y', 'yes']
 
-def findFace(frame_photo):
+def nameAlreadyExists(nameOfContact):
+    return nameOfContact in os.path.isdir('./Contacts')
+        
+def addToContactDir(nameOfContact, face_image):
+    if nameAlreadyExists(nameOfContact):
+        if YNFeedback(f'Are they the same person? A {nameOfContact} already exists?\nPlease Enter y/n: '):
+            if YNFeedback(f'Are you sure {nameOfContact} is the same person? y/n: '):
+                addToPhotos(nameOfContact, face_image)   
+    else:
+        newContactDir = os.mkdir(os.path.join('Contacts', nameOfContact))    
+        addToPhotos(newContactDir, face_image)
+
+def cropFaces(frame_photo):
     '''
     TODO: detect multiple faces
     '''
     try:
         for detector in detectors:
-            face = DeepFace.detectFace(frame_photo, detector_backend = detector)
-            return face
+            face_objs = DeepFace.extract_faces(frame_photo, detector_backend = detector)
+            return face_objs
     except:
         pass
 
@@ -59,14 +72,8 @@ def identifyFace(frame_photo, path_to_contact_photos):
     try:
         for contact in contact_list:
             for detector in detectors:
-                face = DeepFace.find(img_path=frame_photo, db_path=f'./Contacts/', detector_backend=detector)
-            
+                face = DeepFace.find(img_path=frame_photo, db_path=f'./Contacts/', detector_backend=detector)        
                 return face['identity']
-                    
-                
-                    '''
-                    if user selects acceptingNewVisitors as True create new contact
-                    '''
             
     except:
         pass        
@@ -82,9 +89,17 @@ while cap.isOpened():
         break
    
     cv2.imwrite('footage/temp.png', frame)
-    if findFace('footage/temp.png'):
-    identifyFace('footage.temp.png', './Contacts')
     
+    try:
+        if acceptingNewVisitors:
+            if cropFaces('footage/temp.png'):
+                print(identifyFace('footage.temp.png', './Contacts'))
+
+        else:
+            pass
+                        
+    except:
+        pass
 # Release the video capture object and close the OpenCV window
 cap.release()
 
